@@ -13,9 +13,9 @@ routes.get("/", (req:Request,res:Response)=>{
 });
 
 interface Query{
-    filename:string;
-    width:number;
-    height: number;
+    filename?:string;
+    width?:number;
+    height?: number;
 }
 
 //const dirpath = 'C:\Users\EMMANUEL OJONG\Documents\udacity-fullstack-javascript-course\Image-processing-api\src\assets\full';
@@ -34,7 +34,7 @@ routes.get("/images", async (req,res)=>{
         try{
         //const filePath = await  path.join(__dirname, filename as string);
             const imgext = ".jpg";
-            console.log("just image path",imagefolder());
+            //  console.log("just image path",imagefolder());
             let filePath = await  path.join(imagefolder(), filename as string);
             filePath = filePath+imgext;
             // console.log("ext added",filePath+imgext);
