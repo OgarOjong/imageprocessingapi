@@ -4,3 +4,4 @@ important.txt
 .prettierrc
 /src/assets/**/*.jpg
 /src/assets/full/*.jpg
+.env
