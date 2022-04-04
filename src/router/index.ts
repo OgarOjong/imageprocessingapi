@@ -14,14 +14,14 @@ routes.get("/", (req:Request,res:Response)=>{
 });
 
 interface Query{
-    filename?:string;
+    filename:string;
     width:number;
     height: number;
 }
 
 
 routes.get("/images", async (req,res)=>{
-    res.send("REQUEST SENT");
+    
     
     const  {filename, width, height} = req.query as unknown as Query;
     // console.log(typeof width);
@@ -47,30 +47,37 @@ routes.get("/images", async (req,res)=>{
                 }
             });
 
-            const resize = (a:number, b:number)=>{
+            const resize = async (a:number, b:number)=>{
                 a= Number(width);
                 b=Number(height);
 
-                sharp(filePath).resize(a,b).toFile(getDirT() +`${filename}.jpg`)
-                    .then(data => console.log(data))
-                    .catch(err =>console.log(err));
+                const resizedImg =  sharp(filePath).resize(a,b).toFile(getDirT() +`${filename}.jpg`)
+                    .then(data => data)
+                    .catch(err => err);
+                console.log(await resizedImg);
+                return resizedImg;
 
             };
-           
+            console.log("resize printing out",resize(width,height));
+            res.status(200).json({
+                message:"file processed",
+                status: true,
+                data: {
+                    imgurl:`localhost:${process.env.PORT}/assets/thumb/${filename}.jpg`
+                }
+            });
         }
 
         catch(err){
             console.log(err);
         }
+        res.send("Processing Data ... ");
         
     };
     
+
+
     checkFileName(filename as string);
-
-    
-
-    
-
    
 });
 
