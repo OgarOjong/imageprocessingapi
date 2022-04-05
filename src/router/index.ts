@@ -50,28 +50,39 @@ routes.get("/images", async (req,res)=>{
             const resize = async (a:number, b:number)=>{
                 a= Number(width);
                 b=Number(height);
+                const imgpath = getDirT() +  `${filename}.jpg`;
 
-                const resizedImg =  sharp(filePath).resize(a,b).toFile(getDirT() +`${filename}.jpg`)
-                    .then(data => data)
+                sharp(filePath).resize(a,b).toFile(imgpath)
+                    .then((data) =>{
+                        console.log(data);
+                        console.log(imgpath);
+                        //res.writeHead(200, {"Content-Type": "image/jpg"});
+                        res.sendFile(imgpath);
+                        
+                    })
                     .catch(err => err);
-                console.log(await resizedImg);
-                return resizedImg;
+            
+                //   return resizedImg;
 
             };
-            console.log("resize printing out",resize(width,height));
-            res.status(200).json({
+            //   console.log("resize printing out",resize(width,height));
+
+            // res.status(200).sendFile(await resize(width, height));
+
+
+            /* res.status(200).json({
                 message:"file processed",
                 status: true,
                 data: {
                     imgurl:`localhost:${process.env.PORT}/assets/thumb/${filename}.jpg`
                 }
-            });
+            }); */
         }
 
         catch(err){
             console.log(err);
         }
-        res.send("Processing Data ... ");
+        // res.send("Processing Data ... ");
         
     };
     
