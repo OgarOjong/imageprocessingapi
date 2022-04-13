@@ -5,6 +5,9 @@ import fs from "fs";
 import imagefolder from "../assets/full/imagefolder";
 import getDirT from "../assets/thumb/thumbimagefold";
 import sharp from "sharp";
+import NodeCache from "node-cache";
+
+const myCache = new NodeCache({stdTTL:20});
 
 
 const routes = express.Router();
@@ -37,7 +40,7 @@ routes.get("/images", async (req,res)=>{
 
             fs.exists(filePath, (isExist)=>{
                 if(isExist){
-                    console.log("Before resize function ",filePath);
+                    ///console.log("Before resize function ",filePath);
                     resize(width,height);
                     return filePath;
                     
@@ -52,31 +55,35 @@ routes.get("/images", async (req,res)=>{
                 b=Number(height);
                 const imgpath = getDirT() +  `${filename}.jpg`;
 
-                sharp(filePath).resize(a,b).toFile(imgpath)
-                    .then((data) =>{
-                        console.log(data);
-                        console.log(imgpath);
-                        //res.writeHead(200, {"Content-Type": "image/jpg"});
-                        res.sendFile(imgpath);
+                if(myCache.has("cImage")){
+                    //check for cached calls and return cached calls 
+                    console.log("Getting it from cache");
+                    const cachedFile = myCache.get("cImage");
+                    console.log("cached data",cachedFile);
+                    return res.sendFile(String(cachedFile));
+                    //return  res.sendFile(cachedFile);
+                }else{
+                    //return uncached calls 
+                    sharp(filePath).resize(a,b).toFile(imgpath)
+                        .then((data) =>{
+                            console.log(data);
+                            console.log(imgpath);
+                            
+                            myCache.set("cImage", imgpath);
+                            console.log("Getting it from new process");
+                            res.sendFile(imgpath);
                         
-                    })
-                    .catch(err => err);
+                        })
+                        .catch(err => err);
+
+                }
+
+               
             
                 //   return resizedImg;
 
             };
-            //   console.log("resize printing out",resize(width,height));
-
-            // res.status(200).sendFile(await resize(width, height));
-
-
-            /* res.status(200).json({
-                message:"file processed",
-                status: true,
-                data: {
-                    imgurl:`localhost:${process.env.PORT}/assets/thumb/${filename}.jpg`
-                }
-            }); */
+            
         }
 
         catch(err){
@@ -85,11 +92,11 @@ routes.get("/images", async (req,res)=>{
         // res.send("Processing Data ... ");
         
     };
-    
-
-
     checkFileName(filename as string);
-   
+});
+
+routes.get("/stats",(req:Request, res:Response)=>{
+    res.send(myCache.getStats());
 });
 
 export default routes;
